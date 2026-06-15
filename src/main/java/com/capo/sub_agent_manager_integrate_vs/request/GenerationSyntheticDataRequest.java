@@ -6,6 +6,7 @@ public class GenerationSyntheticDataRequest {
 	
 	private String prompt;
 	private String conversationId;
+	private ToolIformation toolRequest;
 	private List<String> imageReferences;
 
 	public String getPrompt() {
@@ -24,6 +25,14 @@ public class GenerationSyntheticDataRequest {
 		this.conversationId = conversationId;
 	}
 
+	public ToolIformation getToolRequest() {
+		return toolRequest;
+	}
+
+	public void setToolRequest(ToolIformation toolRequest) {
+		this.toolRequest = toolRequest;
+	}
+
 	public List<String> getImageReferences() {
 		return imageReferences;
 	}
@@ -31,5 +40,5 @@ public class GenerationSyntheticDataRequest {
 	public void setImageReferences(List<String> imageReferences) {
 		this.imageReferences = imageReferences;
 	}
-		
+	
 }

@@ -11,18 +11,34 @@ public class AgentRegistry {
 	@Value(value="${url-general-chat}")
 	private String urlGeneralChat;
 	
+	@Value(value="${url-extracting-order-command-chat}")
+	private String urlExtractingOrderCommandChat;
+	
+	@Value(value="${url-terminal-command-chat}")
+	private String urlTerminalCommandChat;
+	
 	@Value(value="${agent-type-general-chat:WEBFLUX}")
 	private AgentType agentTypeGeneralChat;
 	
+	@Value(value="${agent-extracting-order-command-chat:SPRING_MVC}")
+	private AgentType agentExtractingOrderCommandChat;
+	
+	@Value(value="${agent-terminal-command-chat:SPRING_MVC}")
+	private AgentType agentTerminalCommandChat;
+	
 	public Map<String, String> getAgents() {
         return Map.of(
-            "general", urlGeneralChat
+            "general", urlGeneralChat,
+            "extractingOrder",urlExtractingOrderCommandChat,
+            "terminalCommand",urlTerminalCommandChat
         );
     }
 
 	public Map<String, AgentType> getAgentTypes() {
         return Map.of(
-            "general", agentTypeGeneralChat
+            "general", agentTypeGeneralChat,
+            "extractingOrder",agentExtractingOrderCommandChat,
+            "terminalCommand",agentTerminalCommandChat
         );
     }
 	
@@ -33,7 +49,9 @@ public class AgentRegistry {
 	 */
 	public Map<String, Boolean> getAgentProducingLongString() {
         return Map.of(
-            "general", Boolean.FALSE
+            "general", Boolean.FALSE,
+            "extractingOrder", Boolean.FALSE,
+            "terminalCommand",Boolean.FALSE
         );
     }
 
@@ -44,7 +62,9 @@ public class AgentRegistry {
 	 */
 	public Map<String, Boolean> getAgentProducingImage() {
         return Map.of(
-            "general", Boolean.FALSE
+            "general", Boolean.FALSE,
+            "extractingOrder", Boolean.FALSE,
+            "terminalCommand",Boolean.FALSE
         );
     }
 
@@ -54,13 +74,17 @@ public class AgentRegistry {
 	 */
 	public Map<String, Boolean> getAgentNeedingImageInput() {
         return Map.of(
-            "general", Boolean.FALSE
+            "general", Boolean.FALSE,
+            "extractingOrder", Boolean.FALSE,
+            "terminalCommand",Boolean.FALSE
         );
     }
 
 	public Map<String, Boolean> getAgentNeedingLongStringInput() {
         return Map.of(
-            "general", Boolean.FALSE
+            "general", Boolean.FALSE,
+            "extractingOrder", Boolean.FALSE,
+            "terminalCommand",Boolean.FALSE
         );
     }
 
@@ -71,7 +95,9 @@ public class AgentRegistry {
 	 */
 	public Map<String, Boolean> getAgentProducingJsonData() {
         return Map.of(
-            "general", Boolean.FALSE
+            "general", Boolean.FALSE,
+            "extractingOrder", Boolean.TRUE,
+            "terminalCommand",Boolean.FALSE
         );
     }
 
@@ -81,7 +107,9 @@ public class AgentRegistry {
 	 */
 	public Map<String, Boolean> getAgentNeedingJsonDataInput() {
         return Map.of(
-            "general", Boolean.FALSE
+            "general", Boolean.FALSE,
+            "extractingOrder", Boolean.FALSE,
+            "terminalCommand",Boolean.TRUE
         );
     }
 
@@ -93,7 +121,9 @@ public class AgentRegistry {
 	 */
 	public Map<String, Boolean> getAgentProducingPrompt() {
         return Map.of(
-            "general", Boolean.FALSE
+            "general", Boolean.FALSE,
+            "extractingOrder", Boolean.FALSE,
+            "terminalCommand",Boolean.FALSE
         );
     }
 
@@ -103,7 +133,9 @@ public class AgentRegistry {
 	 */
 	public Map<String, Boolean> getAgentNeedingPromptInput() {
         return Map.of(
-            "general", Boolean.FALSE
+            "general", Boolean.FALSE,
+            "extractingOrder", Boolean.FALSE,
+            "terminalCommand",Boolean.FALSE
         );
     }
 

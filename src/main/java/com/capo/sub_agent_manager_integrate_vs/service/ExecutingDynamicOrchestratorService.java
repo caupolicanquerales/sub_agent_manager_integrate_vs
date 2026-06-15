@@ -225,15 +225,27 @@ public class ExecutingDynamicOrchestratorService {
 			StringBuilder stepBuffer, ServerSentEvent<String> token) {
 		String rawData = token.data();
 		if (Objects.nonNull(rawData) && !rawData.isBlank()) {
-			DataMessage data = new DataMessage();
-			data.setMessage(rawData);
+			DataMessage data;
+			try {
+				data = mapper.readValue(rawData, DataMessage.class);
+			} catch (Exception e) {
+				data = new DataMessage();
+				data.setMessage(rawData);
+			}
 			ServerSentEvent<DataMessage> mapped = ServerSentEvent.<DataMessage>builder()
 					.id(token.id())
 					.event(token.event())
 					.data(data)
 					.build();
-			pipe.tryEmitNext(mapped);
-			stepBuffer.append(rawData);
+			if (data.getToolCall() != null) {
+				try {
+					stepBuffer.append(mapper.writeValueAsString(data.getToolCall()));
+				} catch (Exception ignored) {}
+				pipe.tryEmitNext(mapped);
+			} else if (data.getMessage() != null) {
+				stepBuffer.append(data.getMessage());
+				pipe.tryEmitNext(mapped);
+			}
 		}
 	}
 
