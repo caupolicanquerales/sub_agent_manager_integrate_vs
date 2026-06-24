@@ -245,6 +245,9 @@ public class ExecutingDynamicOrchestratorService {
 			} else if (data.getMessage() != null) {
 				stepBuffer.append(data.getMessage());
 				pipe.tryEmitNext(mapped);
+			} else if (data.getType() != null) {
+				// Typed messages (e.g. step_actions) carry no message/toolCall — emit as-is
+				pipe.tryEmitNext(mapped);
 			}
 		}
 	}
@@ -289,6 +292,10 @@ public class ExecutingDynamicOrchestratorService {
 						.subscribe();
 			}
 		}
+		if (rawPrompt != null && rawPrompt.contains("[INPUT_ERROR: LOGS]")) {
+			redisTemplate.opsForValue().set(LAYOUT_KEY_PREFIX + conversationId, rawPrompt, CONTEXT_TTL)
+					.subscribe();
+		}
 	}
 
 	private String enrichContext(String ctx, GenerationSyntheticDataRequest request) {
@@ -297,6 +304,9 @@ public class ExecutingDynamicOrchestratorService {
 		String rawPrompt = request.getPrompt();
 		if (rawPrompt != null && rawPrompt.contains("[INPUT_DATA: RAW_DATA]") && !updated.contains("JSON_KEY:")) {
 			updated += "\n[JSON data available | JSON_KEY:" + JSON_DATA_KEY_PREFIX + conversationId + "]";
+		}
+		if (rawPrompt != null && rawPrompt.contains("[INPUT_ERROR: LOGS]") && !updated.contains("STRING_KEY:")) {
+			updated += "\n[String data available | STRING_KEY:" + LAYOUT_KEY_PREFIX + conversationId + "]";
 		}
 		return updated;
 	}

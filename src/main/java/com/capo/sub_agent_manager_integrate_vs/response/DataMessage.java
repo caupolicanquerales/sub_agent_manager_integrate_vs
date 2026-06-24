@@ -1,10 +1,12 @@
 package com.capo.sub_agent_manager_integrate_vs.response;
 
+
 public class DataMessage {
 	
 	private String message;
 	private String type;
 	private DataToolCall toolCall;
+	private DataStepPlanError stepPlanError;
 
 	public String getMessage() {
 		return message;
@@ -29,5 +31,12 @@ public class DataMessage {
 	public void setToolCall(DataToolCall toolCall) {
 		this.toolCall = toolCall;
 	}
-	
+
+	public DataStepPlanError getStepPlanError() {
+		return stepPlanError;
+	}
+
+	public void setStepPlanError(DataStepPlanError stepPlanError) {
+		this.stepPlanError = stepPlanError;
+	}
 }

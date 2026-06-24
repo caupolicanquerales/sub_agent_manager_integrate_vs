@@ -17,6 +17,9 @@ public class AgentRegistry {
 	@Value(value="${url-terminal-command-chat}")
 	private String urlTerminalCommandChat;
 	
+	@Value(value="${url-debugger-chat}")
+	private String urlDebuggerChat;
+	
 	@Value(value="${agent-type-general-chat:WEBFLUX}")
 	private AgentType agentTypeGeneralChat;
 	
@@ -26,11 +29,15 @@ public class AgentRegistry {
 	@Value(value="${agent-terminal-command-chat:SPRING_MVC}")
 	private AgentType agentTerminalCommandChat;
 	
+	@Value(value="${agent-debugger-chat:SPRING_MVC}")
+	private AgentType agentDebuggerChat;
+	
 	public Map<String, String> getAgents() {
         return Map.of(
             "general", urlGeneralChat,
             "extractingOrder",urlExtractingOrderCommandChat,
-            "terminalCommand",urlTerminalCommandChat
+            "terminalCommand",urlTerminalCommandChat,
+            "debugger", urlDebuggerChat
         );
     }
 
@@ -38,7 +45,8 @@ public class AgentRegistry {
         return Map.of(
             "general", agentTypeGeneralChat,
             "extractingOrder",agentExtractingOrderCommandChat,
-            "terminalCommand",agentTerminalCommandChat
+            "terminalCommand",agentTerminalCommandChat,
+            "debugger", agentDebuggerChat
         );
     }
 	
@@ -51,7 +59,8 @@ public class AgentRegistry {
         return Map.of(
             "general", Boolean.FALSE,
             "extractingOrder", Boolean.FALSE,
-            "terminalCommand",Boolean.FALSE
+            "terminalCommand",Boolean.FALSE,
+            "debugger",Boolean.FALSE
         );
     }
 
@@ -64,7 +73,8 @@ public class AgentRegistry {
         return Map.of(
             "general", Boolean.FALSE,
             "extractingOrder", Boolean.FALSE,
-            "terminalCommand",Boolean.FALSE
+            "terminalCommand",Boolean.FALSE,
+            "debugger",Boolean.FALSE
         );
     }
 
@@ -76,7 +86,8 @@ public class AgentRegistry {
         return Map.of(
             "general", Boolean.FALSE,
             "extractingOrder", Boolean.FALSE,
-            "terminalCommand",Boolean.FALSE
+            "terminalCommand",Boolean.FALSE,
+            "debugger",Boolean.FALSE
         );
     }
 
@@ -84,7 +95,8 @@ public class AgentRegistry {
         return Map.of(
             "general", Boolean.FALSE,
             "extractingOrder", Boolean.FALSE,
-            "terminalCommand",Boolean.FALSE
+            "terminalCommand",Boolean.FALSE,
+            "debugger",Boolean.TRUE
         );
     }
 
@@ -97,7 +109,8 @@ public class AgentRegistry {
         return Map.of(
             "general", Boolean.FALSE,
             "extractingOrder", Boolean.TRUE,
-            "terminalCommand",Boolean.FALSE
+            "terminalCommand",Boolean.FALSE,
+            "debugger",Boolean.TRUE
         );
     }
 
@@ -109,7 +122,8 @@ public class AgentRegistry {
         return Map.of(
             "general", Boolean.FALSE,
             "extractingOrder", Boolean.FALSE,
-            "terminalCommand",Boolean.TRUE
+            "terminalCommand",Boolean.TRUE,
+            "debugger",Boolean.FALSE
         );
     }
 
@@ -123,7 +137,8 @@ public class AgentRegistry {
         return Map.of(
             "general", Boolean.FALSE,
             "extractingOrder", Boolean.FALSE,
-            "terminalCommand",Boolean.FALSE
+            "terminalCommand",Boolean.FALSE,
+            "debugger",Boolean.FALSE
         );
     }
 
@@ -135,7 +150,8 @@ public class AgentRegistry {
         return Map.of(
             "general", Boolean.FALSE,
             "extractingOrder", Boolean.FALSE,
-            "terminalCommand",Boolean.FALSE
+            "terminalCommand",Boolean.FALSE,
+            "debugger",Boolean.FALSE
         );
     }
 
