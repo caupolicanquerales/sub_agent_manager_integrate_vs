@@ -248,6 +248,11 @@ public class ExecutingDynamicOrchestratorService {
 			} else if (data.getType() != null) {
 				// Typed messages (e.g. step_actions) carry no message/toolCall — emit as-is
 				pipe.tryEmitNext(mapped);
+			} else if (data.getEditDefect() != null) {
+				try {
+					stepBuffer.append(mapper.writeValueAsString(data.getEditDefect()));
+				} catch (Exception ignored) {}
+				pipe.tryEmitNext(mapped);
 			}
 		}
 	}

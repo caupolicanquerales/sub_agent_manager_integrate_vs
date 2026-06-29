@@ -17,8 +17,11 @@ public class AgentRegistry {
 	@Value(value="${url-terminal-command-chat}")
 	private String urlTerminalCommandChat;
 	
-	@Value(value="${url-debugger-chat}")
-	private String urlDebuggerChat;
+	@Value(value="${url-analyzer-chat}")
+	private String urlAnalyzerChat;
+	
+	@Value(value="${url-patching-chat}")
+	private String urlPatchingChat;
 	
 	@Value(value="${agent-type-general-chat:WEBFLUX}")
 	private AgentType agentTypeGeneralChat;
@@ -29,15 +32,19 @@ public class AgentRegistry {
 	@Value(value="${agent-terminal-command-chat:SPRING_MVC}")
 	private AgentType agentTerminalCommandChat;
 	
-	@Value(value="${agent-debugger-chat:SPRING_MVC}")
-	private AgentType agentDebuggerChat;
+	@Value(value="${agent-analyzer-chat:SPRING_MVC}")
+	private AgentType agentAnalyzerChat;
+	
+	@Value(value="${agent-patching-chat:SPRING_MVC}")
+	private AgentType agentPatchingChat;
 	
 	public Map<String, String> getAgents() {
         return Map.of(
             "general", urlGeneralChat,
             "extractingOrder",urlExtractingOrderCommandChat,
             "terminalCommand",urlTerminalCommandChat,
-            "debugger", urlDebuggerChat
+            "analyzer", urlAnalyzerChat,
+            "patching", urlPatchingChat
         );
     }
 
@@ -46,7 +53,8 @@ public class AgentRegistry {
             "general", agentTypeGeneralChat,
             "extractingOrder",agentExtractingOrderCommandChat,
             "terminalCommand",agentTerminalCommandChat,
-            "debugger", agentDebuggerChat
+            "analyzer", agentAnalyzerChat,
+            "patching", agentPatchingChat
         );
     }
 	
@@ -60,7 +68,8 @@ public class AgentRegistry {
             "general", Boolean.FALSE,
             "extractingOrder", Boolean.FALSE,
             "terminalCommand",Boolean.FALSE,
-            "debugger",Boolean.FALSE
+            "analyzer",Boolean.FALSE,
+            "patching",Boolean.FALSE
         );
     }
 
@@ -74,7 +83,8 @@ public class AgentRegistry {
             "general", Boolean.FALSE,
             "extractingOrder", Boolean.FALSE,
             "terminalCommand",Boolean.FALSE,
-            "debugger",Boolean.FALSE
+            "analyzer",Boolean.FALSE,
+            "patching",Boolean.FALSE
         );
     }
 
@@ -87,7 +97,8 @@ public class AgentRegistry {
             "general", Boolean.FALSE,
             "extractingOrder", Boolean.FALSE,
             "terminalCommand",Boolean.FALSE,
-            "debugger",Boolean.FALSE
+            "analyzer",Boolean.FALSE,
+            "patching",Boolean.FALSE
         );
     }
 
@@ -96,7 +107,8 @@ public class AgentRegistry {
             "general", Boolean.FALSE,
             "extractingOrder", Boolean.FALSE,
             "terminalCommand",Boolean.FALSE,
-            "debugger",Boolean.TRUE
+            "analyzer",Boolean.TRUE,
+            "patching",Boolean.FALSE
         );
     }
 
@@ -110,7 +122,8 @@ public class AgentRegistry {
             "general", Boolean.FALSE,
             "extractingOrder", Boolean.TRUE,
             "terminalCommand",Boolean.FALSE,
-            "debugger",Boolean.TRUE
+            "analyzer",Boolean.TRUE,
+            "patching",Boolean.FALSE
         );
     }
 
@@ -123,7 +136,8 @@ public class AgentRegistry {
             "general", Boolean.FALSE,
             "extractingOrder", Boolean.FALSE,
             "terminalCommand",Boolean.TRUE,
-            "debugger",Boolean.FALSE
+            "analyzer",Boolean.FALSE,
+            "patching",Boolean.FALSE
         );
     }
 
@@ -138,7 +152,8 @@ public class AgentRegistry {
             "general", Boolean.FALSE,
             "extractingOrder", Boolean.FALSE,
             "terminalCommand",Boolean.FALSE,
-            "debugger",Boolean.FALSE
+            "analyzer",Boolean.FALSE,
+            "patching",Boolean.FALSE
         );
     }
 
@@ -151,7 +166,8 @@ public class AgentRegistry {
             "general", Boolean.FALSE,
             "extractingOrder", Boolean.FALSE,
             "terminalCommand",Boolean.FALSE,
-            "debugger",Boolean.FALSE
+            "analyzer",Boolean.FALSE,
+            "patching",Boolean.FALSE
         );
     }
 
