@@ -41,6 +41,7 @@ public class ExecutingDynamicOrchestratorService {
 	private static final String LAYOUT_KEY_PREFIX    = "layout:latest:";
 	private static final String JSON_DATA_KEY_PREFIX = "jsonData:latest:";
 	private static final String PROMPT_KEY_PREFIX    = "prompt:latest:";
+	private static final String RESPONSE_KEY_PREFIX  = "response:last:";
 	private static final Duration CONTEXT_TTL        = Duration.ofHours(1);
 
 	// ── Orchestration limits ─────────────────────────────────────────────────────
@@ -64,17 +65,20 @@ public class ExecutingDynamicOrchestratorService {
 	private final ObjectMapper mapper;
 	private final ReactiveStringRedisTemplate redisTemplate;
 	private final String systemPrompt;
+	private final MapReplayLastResponseService mapReplayLastResponseService;
 
 	public ExecutingDynamicOrchestratorService(@Qualifier("chatClientOrchestrator") ChatClient chatClient,
 			WebClient webClient, AgentRegistry registry, ObjectMapper mapper,
 			ReactiveStringRedisTemplate redisTemplate,
-			@Qualifier("systemPrompt") String systemPrompt) {
+			@Qualifier("systemPrompt") String systemPrompt,
+			MapReplayLastResponseService mapReplayLastResponseService) {
 		this.chatClient = chatClient;
 		this.webClient = webClient;
 		this.registry = registry;
 		this.mapper = mapper;
 		this.redisTemplate = redisTemplate;
 		this.systemPrompt = systemPrompt;
+		this.mapReplayLastResponseService = mapReplayLastResponseService;
 	}
 
 	// ── Public API ───────────────────────────────────────────────────────────────
@@ -85,9 +89,15 @@ public class ExecutingDynamicOrchestratorService {
 
 		storeInboundResources(request);
 
-		redisTemplate.opsForValue().get(CONTEXT_KEY_PREFIX + conversationId)
-				.defaultIfEmpty("")
-				.map(ctx -> enrichContext(ctx, request))
+		// Clear the orchestration context at the start of every new top-level request
+		// so the LLM does not see completed steps from a previous conversation turn
+		// and incorrectly return FINAL without executing anything.
+		// Note: response:last:{agent}:{conversationId} keys are intentionally preserved for REPLAY.
+		redisTemplate.opsForValue().delete(CONTEXT_KEY_PREFIX + conversationId)
+				.then(Mono.defer(() -> {
+					String freshContext = enrichContext("", request);
+					return Mono.just(freshContext);
+				}))
 				.subscribe(ctx -> processStep(request.getPrompt(), ctx, userPipe, 0, conversationId));
 
 		return userPipe.asFlux();
@@ -112,7 +122,7 @@ public class ExecutingDynamicOrchestratorService {
 		Mono.fromCallable(() -> chatClient.prompt()
 				.messages(new SystemMessage(systemPrompt))
 				.user(u -> u.text("Current Goal: {goal}\nContext: {context}\nAvailable: {agents}").params(model))
-				.advisors(a -> a.param("chat_memory_conversation_id", conversationId + ":orch:" + depth))
+				.advisors(a -> a.param("chat_memory_conversation_id", conversationId + ":orch"))
 				.call()
 				.content())
 				.subscribeOn(Schedulers.boundedElastic())
@@ -127,6 +137,8 @@ public class ExecutingDynamicOrchestratorService {
 					}
 					if ("FINAL".equalsIgnoreCase(res.action())) {
 						pipe.tryEmitComplete();
+					} else if ("REPLAY".equalsIgnoreCase(res.action())) {
+						replayLastResponse(res.agent(), conversationId, pipe);
 					} else {
 						executeAgent(originalGoal, accumulatedContext, pipe, depth, res, conversationId);
 					}
@@ -173,8 +185,29 @@ public class ExecutingDynamicOrchestratorService {
 				.subscribe();
 	}
 
+	private void replayLastResponse(String agent, String conversationId,
+			Sinks.Many<ServerSentEvent<DataMessage>> pipe) {
+		String key = RESPONSE_KEY_PREFIX + agent + ":" + conversationId;
+		redisTemplate.opsForValue().get(key)
+				.defaultIfEmpty("")
+				.subscribe(stored -> {
+					if (stored.isBlank()) {
+						DataMessage err = new DataMessage();
+						err.setMessage("No previous response found for agent: " + agent);
+						pipe.tryEmitNext(ServerSentEvent.<DataMessage>builder().data(err).build());
+					} else {
+						DataMessage msg = mapReplayLastResponseService.mapReplayLastResponse(stored, agent);	
+						pipe.tryEmitNext(ServerSentEvent.<DataMessage>builder().data(msg).build());
+					}
+					pipe.tryEmitComplete();
+				}, pipe::tryEmitError);
+	}
+
 	private void handleStepCompletion(DecisionResult res, String rawOutput, int depth, String conversationId,
 			String originalGoal, String accumulatedContext, Sinks.Many<ServerSentEvent<DataMessage>> pipe) {
+
+		redisTemplate.opsForValue().set(
+				RESPONSE_KEY_PREFIX + res.agent() + ":" + conversationId, rawOutput, CONTEXT_TTL).subscribe();
 
 		String layoutKey = resolveRedisKey(res.agent(), registry.getAgentProducingLongString(),
 				registry.getAgentNeedingLongStringInput(), LAYOUT_KEY_PREFIX, conversationId, rawOutput);
@@ -187,7 +220,26 @@ public class ExecutingDynamicOrchestratorService {
 				buildStepSummary(res, rawOutput, depth, layoutKey, jsonKey, promptKey));
 
 		redisTemplate.opsForValue().set(CONTEXT_KEY_PREFIX + conversationId, nextContext, CONTEXT_TTL).subscribe();
+
+		// If the agent produced a tool-call response (e.g. extractingOrder returning
+		// getProjectMetadata), the extension must execute the tool and send the result
+		// back as a new request. Stop the chain here so the orchestrator does not
+		// immediately call terminalCommand with the wrong (plain-text) prompt.
+		if (isToolCallOutput(rawOutput)) {
+			pipe.tryEmitComplete();
+			return;
+		}
+
 		processStep(originalGoal, nextContext, pipe, depth + 1, conversationId);
+	}
+
+	/**
+	 * Returns true when the step buffer captured a tool-call JSON rather than
+	 * a plain text / command / markdown response.
+	 * extractingOrder emits DataToolCall JSON: {"name":"getProjectMetadata","arguments":[...]}
+	 */
+	private boolean isToolCallOutput(String rawOutput) {
+		return rawOutput != null && rawOutput.contains("\"name\"") && rawOutput.contains("getProjectMetadata");
 	}
 
 	/**
